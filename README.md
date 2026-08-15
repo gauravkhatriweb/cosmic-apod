@@ -53,7 +53,7 @@ Built for the [Hack Club Stardance](https://stardance.hackclub.com/) "Give Your 
 
 ```bash
 # Clone the repository
-git clone https://github.com/<your-username>/cosmic-apod.git
+git clone https://github.com/gauravkhatriweb/cosmic-apod.git
 cd cosmic-apod
 
 # Install dependencies
