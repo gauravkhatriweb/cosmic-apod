@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO -->
+  <title>Cosmic APOD — NASA Astronomy Picture of the Day Explorer</title>
+  <meta name="description" content="Explore NASA's Astronomy Picture of the Day with date navigation, favorites, history, and sharing. A polished space-themed experience." />
+  <meta name="theme-color" content="#0a0e1a" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Cosmic APOD" />
+  <meta property="og:description" content="Explore NASA's Astronomy Picture of the Day — beautifully presented." />
+  <meta property="og:type" content="website" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <!-- Skip-to-content link for keyboard users -->
+  <a href="#main-content" class="skip-link">Skip to content</a>
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a href="#" class="logo" aria-label="Cosmic APOD — Home">
+        <span class="logo-icon" aria-hidden="true">✦</span>
+        <span class="logo-text">Cosmic <span class="logo-accent">APOD</span></span>
+      </a>
+
+      <nav class="header-nav" aria-label="Primary">
+        <button type="button" class="nav-btn" id="btn-today" aria-label="Go to today's picture">
+          <span class="nav-icon" aria-hidden="true">☀</span>
+          <span>Today</span>
+        </button>
+        <button type="button" class="nav-btn" id="btn-random" aria-label="View a random APOD">
+          <span class="nav-icon" aria-hidden="true">🎲</span>
+          <span>Random</span>
+        </button>
+        <button type="button" class="nav-btn" id="btn-favorites" aria-label="Open favorites panel">
+          <span class="nav-icon" aria-hidden="true">★</span>
+          <span>Favorites</span>
+        </button>
+        <button type="button" class="nav-btn" id="btn-history" aria-label="Open history panel">
+          <span class="nav-icon" aria-hidden="true">⏱</span>
+          <span>History</span>
+        </button>
+      </nav>
+
+      <!-- Mobile menu toggle -->
+      <button type="button" class="mobile-menu-toggle" id="mobile-menu-toggle"
+        aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+        <span class="hamburger" aria-hidden="true"></span>
+      </button>
+    </div>
+
+    <!-- Mobile dropdown menu -->
+    <div class="mobile-menu" id="mobile-menu" hidden>
+      <button type="button" class="mobile-nav-btn" data-action="today">☀ Today</button>
+      <button type="button" class="mobile-nav-btn" data-action="random">🎲 Random</button>
+      <button type="button" class="mobile-nav-btn" data-action="favorites">★ Favorites</button>
+      <button type="button" class="mobile-nav-btn" data-action="history">⏱ History</button>
+    </div>
+  </header>
+
+  <!-- ===================== STAR CANVAS ===================== -->
+  <canvas id="star-canvas" aria-hidden="true"></canvas>
+
+  <!-- ===================== MAIN ===================== -->
+  <main id="main-content">
+
+    <!-- Date Navigation Bar -->
+    <section class="date-bar" aria-label="Date navigation">
+      <button type="button" class="date-nav-btn" id="btn-prev" aria-label="Previous day">
+        ‹
+      </button>
+      <div class="date-picker-wrap">
+        <input type="date" id="date-picker" class="date-picker"
+          aria-label="Select a date" />
+      </div>
+      <button type="button" class="date-nav-btn" id="btn-next" aria-label="Next day">
+        ›
+      </button>
+    </section>
+
+    <!-- Loading State -->
+    <section class="loading-state" id="loading-state" aria-live="polite" aria-label="Loading">
+      <div class="loader">
+        <div class="loader-ring"></div>
+        <p class="loader-text">Fetching the cosmos…</p>
+      </div>
+    </section>
+
+    <!-- Error State -->
+    <section class="error-state" id="error-state" hidden aria-live="assertive" aria-label="Error">
+      <div class="error-card">
+        <span class="error-icon" aria-hidden="true">⚠</span>
+        <h2 class="error-title">Houston, we have a problem</h2>
+        <p class="error-message" id="error-message">Something went wrong while fetching the picture of the day.</p>
+        <button type="button" class="btn btn-primary" id="btn-retry">Try Again</button>
+      </div>
+    </section>
+
+    <!-- APOD Hero -->
+    <article class="apod-hero" id="apod-hero" hidden aria-label="Astronomy Picture of the Day">
+
+      <!-- Media container -->
+      <div class="hero-media-wrap">
+        <div class="hero-media" id="hero-media">
+          <!-- Populated by JS: <img> or <iframe> -->
+        </div>
+        <button type="button" class="fullscreen-btn" id="btn-fullscreen" aria-label="Open fullscreen view">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Info panel -->
+      <div class="hero-info">
+        <div class="hero-meta">
+          <span class="meta-badge" id="apod-media-type" aria-label="Media type"></span>
+          <time class="meta-date" id="apod-date" aria-label="Date"></time>
+        </div>
+
+        <h1 class="hero-title" id="apod-title"></h1>
+
+        <p class="hero-explanation" id="apod-explanation"></p>
+        <button type="button" class="read-more-btn" id="btn-read-more" hidden>
+          Read more
+        </button>
+
+        <footer class="hero-footer">
+          <p class="hero-copyright" id="apod-copyright"></p>
+          <div class="hero-actions">
+            <button type="button" class="action-btn" id="btn-favorite" aria-label="Add to favorites" aria-pressed="false">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              <span class="action-label">Favorite</span>
+            </button>
+            <button type="button" class="action-btn" id="btn-share" aria-label="Share this APOD">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+              <span class="action-label">Share</span>
+            </button>
+            <a class="action-btn" id="btn-hd" href="#" target="_blank" rel="noopener noreferrer" aria-label="Open HD image" hidden>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                <polyline points="15 3 21 3 21 9"/>
+                <line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+              <span class="action-label">HD</span>
+            </a>
+          </div>
+        </footer>
+      </div>
+    </article>
+  </main>
+
+  <!-- ===================== SIDE PANEL (Favorites / History) ===================== -->
+  <aside class="side-panel" id="side-panel" hidden aria-label="Panel">
+    <div class="panel-backdrop" id="panel-backdrop"></div>
+    <div class="panel-content" role="dialog" aria-modal="true">
+      <div class="panel-header">
+        <h2 class="panel-title" id="panel-title">Favorites</h2>
+        <button type="button" class="panel-close" id="panel-close" aria-label="Close panel">✕</button>
+      </div>
+      <div class="panel-body" id="panel-body">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===================== LIGHTBOX ===================== -->
+  <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Fullscreen image view">
+    <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
+    <div class="lightbox-content" id="lightbox-content">
+      <!-- Populated by JS -->
+    </div>
+    <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Close fullscreen view">✕</button>
+  </div>
+
+  <!-- ===================== TOAST ===================== -->
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="site-footer" role="contentinfo">
+    <p>Data powered by <a href="https://api.nasa.gov" target="_blank" rel="noopener noreferrer">NASA Open APIs</a></p>
+    <p class="footer-tagline">✨ The universe, one day at a time.</p>
+  </footer>
+
+  <!-- App entry point -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
