@@ -32,7 +32,19 @@ export async function generateAITags(imageElement) {
     }
     
     showToast('✦ Analyzing image locally...', 'info');
-    const tags = await mlTagger.generateMLTags(imageElement);
+    
+    // Create a CORS-friendly duplicate image for TFJS to read
+    const proxyImg = new Image();
+    proxyImg.crossOrigin = 'anonymous';
+    // Use a CORS proxy so we can draw it to WebGL
+    proxyImg.src = `https://api.allorigins.win/raw?url=${encodeURIComponent(imageElement.src)}`;
+    
+    await new Promise((resolve, reject) => {
+      proxyImg.onload = resolve;
+      proxyImg.onerror = () => reject(new Error("CORS Proxy Failed"));
+    });
+    
+    const tags = await mlTagger.generateMLTags(proxyImg);
     showToast('✓ Tags generated locally', 'success');
     return tags;
   } catch (err) {

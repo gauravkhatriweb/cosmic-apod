@@ -121,7 +121,6 @@ function renderApod(apod) {
   } else {
     const img = document.createElement('img');
     img.src = apod.url;
-    img.crossOrigin = 'anonymous'; // Required for TFJS
     img.alt = escapeHtml(apod.title);
     img.loading = 'eager';
     img.decoding = 'async'; // V2 Performance upgrade
