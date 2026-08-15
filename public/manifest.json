@@ -1,0 +1,17 @@
+{
+  "name": "Cosmic APOD V3",
+  "short_name": "Cosmic APOD",
+  "description": "Explore NASA's Astronomy Picture of the Day offline and build your cosmic collections.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0e1a",
+  "theme_color": "#0a0e1a",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -23,9 +23,11 @@
  */
 
 import { getCachedApod, setCachedApod } from './cache.js';
+import { getInitialTags } from '../services/tagging/tagger-core.js';
+import { getSettings } from '../components/settings.js';
 
 const BASE_URL = 'https://api.nasa.gov/planetary/apod';
-const API_KEY = import.meta.env.VITE_NASA_API_KEY || 'DEMO_KEY';
+const ENV_API_KEY = import.meta.env.VITE_NASA_API_KEY || 'DEMO_KEY';
 
 // NASA APOD archive starts on 1995-06-16
 export const APOD_START_DATE = '1995-06-16';
@@ -36,8 +38,11 @@ let currentAbortController = null;
  * Build URL with query parameters.
  */
 function buildUrl(params = {}) {
+  const { nasaApiKey } = getSettings();
+  const activeKey = nasaApiKey || ENV_API_KEY;
+
   const url = new URL(BASE_URL);
-  url.searchParams.set('api_key', API_KEY);
+  url.searchParams.set('api_key', activeKey);
   for (const [key, value] of Object.entries(params)) {
     if (value !== undefined && value !== null) {
       url.searchParams.set(key, String(value));
@@ -67,34 +72,47 @@ async function request(params = {}, signal) {
   }
 
   if (!res.ok) {
-    // Check rate-limit headers for a better message
     const remaining = res.headers.get('X-RateLimit-Remaining');
     if (res.status === 429 || remaining === '0') {
-      throw new Error(
-        'Rate limit exceeded — you\'ve used all available requests. '
-        + 'Please wait an hour or use a personal API key.'
-      );
+      const error = new Error('Rate limit exceeded');
+      error.code = 'RATE_LIMITED';
+      error.reset = res.headers.get('X-RateLimit-Reset') || null;
+      throw error;
     }
-    if (res.status === 403) throw new Error('Invalid or missing NASA API key.');
-    if (res.status >= 500) throw new Error('NASA servers are temporarily unavailable. Please try again later.');
+    if (res.status === 403) {
+      const error = new Error('Invalid or missing NASA API key.');
+      error.code = 'INVALID_KEY';
+      throw error;
+    }
+    if (res.status >= 500) {
+      const error = new Error('NASA servers are temporarily unavailable. Please try again later.');
+      error.code = 'SERVER_ERROR';
+      throw error;
+    }
     
     // Attempt to extract the API error message, but sanitize it
     try {
       const body = await res.json();
       const msg = body?.msg || body?.error?.message;
       if (msg && !msg.toLowerCase().includes('syntaxerror')) {
-        throw new Error(msg);
+        const error = new Error(msg);
+        error.code = 'API_ERROR';
+        throw error;
       }
     } catch (e) {
       // Fallback
     }
-    throw new Error('We could not retrieve the astronomy picture for this date.');
+    const error = new Error('We could not retrieve the astronomy picture for this date.');
+    error.code = 'UNKNOWN_ERROR';
+    throw error;
   }
 
   try {
     return await res.json();
   } catch {
-    throw new Error('We received an invalid response from NASA. Please try another date.');
+    const error = new Error('We received an invalid response from NASA. Please try another date.');
+    error.code = 'PARSE_ERROR';
+    throw error;
   }
 }
 
@@ -123,7 +141,7 @@ export function validateApod(data) {
 export async function fetchApod(date) {
   // 1. Check cache first
   if (date) {
-    const cached = getCachedApod(date);
+    const cached = await getCachedApod(date);
     if (cached) return cached;
   }
 
@@ -141,9 +159,12 @@ export async function fetchApod(date) {
     const apod = validateApod(raw);
     if (!apod) throw new Error('The API returned an unexpected response format.');
     
+    // Generate Tags asynchronously
+    apod.tags = await getInitialTags(apod);
+    
     // 3. Update cache
     if (apod.date) {
-      setCachedApod(apod.date, apod);
+      setCachedApod(apod.date, apod); // async, but we don't strictly need to await it
     }
     
     return apod;
@@ -172,6 +193,8 @@ export async function fetchRandomApod() {
     const apod = validateApod(list[0]);
     if (!apod) throw new Error('The API returned an unexpected response format.');
     
+    apod.tags = await getInitialTags(apod);
+    
     if (apod.date) {
       setCachedApod(apod.date, apod);
     }
@@ -197,6 +220,11 @@ export async function fetchMultipleApods(params) {
     const list = Array.isArray(raw) ? raw : [raw];
     
     const validApods = list.map(validateApod).filter(Boolean);
+    
+    // Generate tags for all in parallel
+    await Promise.all(validApods.map(async (apod) => {
+      apod.tags = await getInitialTags(apod);
+    }));
     
     // Cache them as we get them
     validApods.forEach(apod => {

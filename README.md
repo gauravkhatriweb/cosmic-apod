@@ -11,7 +11,7 @@ A modern NASA Astronomy Picture of the Day explorer built for discovery, learnin
 [![Vite](https://img.shields.io/badge/Vite-6.3-646CFF?logo=vite&logoColor=white)](#)
 [![Vanilla JS](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black)](#)
 [![NASA API](https://img.shields.io/badge/NASA-APOD_API-0B3D91?logo=nasa&logoColor=white)](#)
-[![Version](https://img.shields.io/badge/Version-V2-blue)](#)
+[![Version](https://img.shields.io/badge/Version-V3-blue)](#)
 [![Status](https://img.shields.io/badge/Status-Active_Development-success)](#)
 
 </div>
@@ -22,28 +22,29 @@ Cosmic APOD is a modern, immersive web application that brings NASA's Astronomy 
 
 ---
 
-## ✨ What's New in V2
+## ✨ What's New in V3
 
-V2 completely transforms the prototype into a production-ready Single Page Application (SPA).
+V3 transforms Cosmic APOD into a full Progressive Web App (PWA) with offline capabilities, deep organization features, and significantly hardened performance.
 
 ### 🔭 Discovery
-- **Dashboard:** A daily portal featuring Today's APOD, "On This Day" (last year), and recent discoveries.
-- **Explorer:** A dedicated archive view to shuffle randomly or browse the last 20 days.
-- **Education Mode:** Expandable panels offering contextual cosmic insights.
+- **Dashboard:** A daily portal featuring Today's APOD, "On This Day", recent discoveries, and interactive Cosmic Tags.
+- **Advanced Explorer:** A dedicated, filterable archive view with custom date-range selection and batch data fetching for massive leaps in time.
+- **Local AI Intelligence:** On-device machine-learning image tagging using TensorFlow.js (MobileNet) generated entirely in your browser without sacrificing privacy.
 
-### ❤️ Personalization
+### ❤️ Personalization & Organization
+- **Collections:** Go beyond favorites by creating custom, renameable collections to curate your own cosmic galleries.
 - **Favorites & History:** Slide-out panels to manage saved and recently viewed APODs.
-- **Themes:** Support for Cosmic Dark and High Contrast modes.
+- **Dynamic Settings:** Configure Default Views (e.g., launch straight to Explorer), clear offline caches, and wipe personal data easily.
 
 ### 🎨 Experience
-- **SPA Architecture:** Seamless transitions between views without full page reloads.
-- **Immersive Media:** Fullscreen lightbox for high-resolution images and integrated support for YouTube/Vimeo video APODs.
-- **Reduced Motion:** Automatic disabling of canvas starfields and CSS transitions for users preferring reduced motion.
+- **PWA & Offline Support:** Installable on desktop and mobile. A dedicated Service Worker caches the application shell and NASA media, allowing you to browse previously loaded APODs without an internet connection.
+- **Immersive Media:** Fullscreen accessible lightbox for high-resolution images and integrated support for YouTube/Vimeo video APODs.
+- **Toast Notifications:** Non-intrusive, accessible toast alerts replace generic browser popups for a premium feel.
 
 ### ⚡ Engineering
-- **Resilience:** Intelligent request caching and `AbortController` cancellation to handle rapid user navigation.
-- **Error Recovery:** Graceful fallback UI for network failures.
-- **Hardened Persistence:** Safe `localStorage` wrappers to prevent crashes from quota limits or corrupted data.
+- **API Resilience:** First-class rate-limit handling with time-to-reset calculations and support for custom "Bring Your Own" NASA API Keys to bypass standard rate limits.
+- **Offline Fallback:** Graceful offline banners and localized network failure states.
+- **Intelligent Storage:** IndexedDB caching prevents quota errors, while `AbortController` handles rapid user navigation to avoid race conditions.
 
 ---
 
@@ -55,8 +56,8 @@ Navigate between the curated **Dashboard** and the sprawling **Explorer** grid t
 ### 📅 Archive
 Use the built-in date picker or keyboard-navigable arrows to seamlessly jump to any specific day in the NASA archive since June 1995.
 
-### ❤️ Favorites
-Save breathtaking cosmic imagery to your personal Favorites panel. Data is safely serialized and synced to your browser's local storage.
+### ❤️ Favorites & Collections
+Save breathtaking cosmic imagery to your personal Favorites, or organize them into custom Collections. Data is safely serialized and synced to your browser's local storage.
 
 ### 🕘 History
 Never lose track of a discovery. The History panel automatically logs recently viewed APODs for quick retrieval.
@@ -102,8 +103,9 @@ Cosmic APOD uses a clean, Vanilla JavaScript Single Page Application (SPA) archi
 | **Vite** | Development server and production build |
 | **Vanilla JavaScript** | Application logic, routing, and state management |
 | **CSS** | Custom responsive UI, design system, and glassmorphism |
+| **Service Worker** | Caching, offline support, and PWA installation |
 | **NASA APOD API** | The source of truth for daily astronomy data |
-| **LocalStorage** | Client-side persistence for preferences and favorites |
+| **IndexedDB & LocalStorage** | Client-side persistence for data and preferences |
 | **GitHub Actions** | Automated CI/CD pipeline |
 
 ---
@@ -146,7 +148,7 @@ This project retrieves its data directly from the [NASA Astronomy Picture of the
 - **Data Retrieved:** APOD title, date, explanation, media type, standard URL, and HD URL.
 - **Rate Limits:** `DEMO_KEY` allows 30 requests/hour per IP. A personal API key allows 1,000 requests/hour.
 
-> ⚠️ **Security Note:** Vite bundles variables prefixed with `VITE_` into the client-side code. This means your NASA API key will be visible in the browser network tab. This is perfectly acceptable for the free, public NASA API, but you should never use this pattern for sensitive credentials like database passwords or paid service tokens.
+> ⚠️ **Known Limitation - API Key Exposure:** Because Cosmic APOD is built entirely as a client-side architecture (frontend-only) to remain lightweight and independent of backend infrastructure, the NASA API key is exposed in network requests. This is an intentional architectural trade-off. It is acceptable for the free, public NASA API when deploying personal projects, but you should never use this pattern for sensitive credentials or paid APIs.
 
 ---
 
@@ -231,36 +233,32 @@ Cosmic APOD treats accessibility as a first-class citizen:
 
 ---
 
-## 🔄 V1 → V2 Evolution
+## 🔄 Evolution
 
-| Area | V1 (Prototype) | V2 (Production) |
+| Area | V2 | V3 (Current) |
 |---|---|---|
-| **Architecture** | Single static view | Multi-view SPA with virtual routing |
-| **Discovery** | Single date picker | Dedicated Dashboard and Explorer views |
-| **Networking** | Basic fetch | Caching, `AbortController`, graceful fallbacks |
-| **Accessibility** | Basic | Focus trapping, robust keyboard support, reduced motion |
-| **Resilience** | Brittle storage | Hardened local storage fallbacks |
-| **Media** | Standard viewer | Advanced fullscreen Lightbox |
+| **Architecture** | SPA | Installable Progressive Web App (PWA) |
+| **Data Fetching** | Single requests | Batch fetching & Date Ranges |
+| **API Handling** | No rate limits UI | Rate Limit UI + Custom API Keys |
+| **Intelligence** | Regex tags | On-device Machine Learning (TF.js) |
+| **Organization** | Favorites | Shareable Collections with Previews |
 
 ---
 
 ## 🗺 Roadmap
 
-### ✅ Completed — V2
-- Single Page Application architecture
-- Dashboard and Explorer views
-- Theming and Settings panel
-- Focus trapping and A11y hardening
-- AbortController and caching
+### ✅ Completed — V3
+- Machine learning-based image tagging (MobileNet)
+- Custom NASA API Key Configuration
+- Date-Range Explorer for time-travel queries
+- Shareable Collection Previews (No generic alerts)
+- API Rate-Limit Resilience
 
-### 🚧 Next — V2.x
-- Machine learning-based image tagging
-- Date range filtering within the Explorer view
-- Shareable Collections
-
-### 🔭 Future — V3
-- Full Offline PWA support with Service Workers
+### 🔭 Future — V4
 - WebGL enhanced stargazing background
+- User accounts (Optional via Firebase)
+- Multi-language translation support
+- Audio/Podcast integration for explanations
 
 ---
 

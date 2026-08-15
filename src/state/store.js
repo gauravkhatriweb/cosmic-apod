@@ -9,12 +9,16 @@ import { todayString } from '../utils/dates.js';
 
 // Define initial state shape
 const state = {
-  currentView: 'dashboard', // 'dashboard' | 'explorer' | 'apod'
+  currentView: 'dashboard', // 'dashboard' | 'explorer' | 'apod' | 'collections'
   currentApod: null,
   currentDate: todayString(),
   status: 'idle', // 'idle' | 'loading' | 'error' | 'success'
   errorDetails: null,
+  isOffline: !navigator.onLine,
 };
+
+window.addEventListener('online', () => setState({ isOffline: false }));
+window.addEventListener('offline', () => setState({ isOffline: true }));
 
 const listeners = new Set();
 
@@ -71,10 +75,10 @@ export function setApodSuccess(apod) {
   });
 }
 
-export function setApodError(errorMsg) {
+export function setApodError(error) {
   setState({
     status: 'error',
-    errorDetails: errorMsg,
+    errorDetails: error,
   });
 }
 

@@ -18,8 +18,10 @@
   
   <link rel="canonical" href="https://cosmic-apod.vercel.app/" />
 
-  <!-- Favicon -->
+  <!-- Favicon & Manifest -->
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/favicon.svg" />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -33,6 +35,11 @@
 <body>
   <!-- Skip-to-content link for keyboard users -->
   <a href="#main-content" class="skip-link">Skip to content</a>
+
+  <!-- Offline Banner -->
+  <div id="offline-banner" class="offline-banner" hidden aria-live="polite">
+    You are currently offline. Showing cached content.
+  </div>
 
   <!-- ===================== HEADER ===================== -->
   <header class="site-header" role="banner">
@@ -55,13 +62,13 @@
           <span class="nav-icon" aria-hidden="true">☀</span>
           <span>Today</span>
         </button>
-        <button type="button" class="nav-btn" id="btn-random" aria-label="View a random APOD">
-          <span class="nav-icon" aria-hidden="true">🎲</span>
-          <span>Random</span>
-        </button>
         <button type="button" class="nav-btn" id="btn-favorites" aria-label="Open favorites panel">
           <span class="nav-icon" aria-hidden="true">★</span>
           <span>Favorites</span>
+        </button>
+        <button type="button" class="nav-btn" id="btn-nav-collections" aria-label="Open collections">
+          <span class="nav-icon" aria-hidden="true">📂</span>
+          <span>Collections</span>
         </button>
         <button type="button" class="nav-btn" id="btn-history" aria-label="Open history panel">
           <span class="nav-icon" aria-hidden="true">⏱</span>
@@ -85,8 +92,8 @@
       <button type="button" class="mobile-nav-btn" data-action="dashboard">⊞ Dashboard</button>
       <button type="button" class="mobile-nav-btn" data-action="explorer">🔭 Explorer</button>
       <button type="button" class="mobile-nav-btn" data-action="today">☀ Today</button>
-      <button type="button" class="mobile-nav-btn" data-action="random">🎲 Random</button>
       <button type="button" class="mobile-nav-btn" data-action="favorites">★ Favorites</button>
+      <button type="button" class="mobile-nav-btn" data-action="collections">📂 Collections</button>
       <button type="button" class="mobile-nav-btn" data-action="history">⏱ History</button>
       <button type="button" class="mobile-nav-btn" data-action="settings">⚙️ Settings</button>
     </div>
@@ -105,6 +112,11 @@
 
     <!-- ===================== VIEW: EXPLORER ===================== -->
     <section id="view-explorer" hidden aria-label="Explorer View">
+      <!-- Populated by JS -->
+    </section>
+
+    <!-- ===================== VIEW: COLLECTIONS ===================== -->
+    <section id="view-collections" hidden aria-label="Collections View">
       <!-- Populated by JS -->
     </section>
 
@@ -166,6 +178,9 @@
 
         <h1 class="hero-title" id="apod-title"></h1>
 
+        <div id="apod-tags-container" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center;">
+          <!-- Tags will be injected here -->
+        </div>
         <p class="hero-explanation" id="apod-explanation"></p>
         <button type="button" class="read-more-btn" id="btn-read-more" hidden>Read more</button>
         
@@ -233,26 +248,84 @@
   <!-- ===================== SETTINGS MODAL ===================== -->
   <div class="lightbox" id="settings-modal" hidden role="dialog" aria-modal="true" aria-label="Settings">
     <div class="lightbox-backdrop" id="settings-backdrop"></div>
-    <div class="panel-content settings-content" style="max-width: 400px; margin: 10vh auto; position: relative; z-index: 200;">
+    <div class="panel-content settings-content" style="max-width: 600px; margin: 5vh auto; position: relative; z-index: 200; display: flex; flex-direction: column; max-height: 90vh;">
       <div class="panel-header">
         <h2 class="panel-title">Settings</h2>
         <button type="button" class="panel-close" id="settings-close" aria-label="Close settings">✕</button>
       </div>
-      <div class="panel-body">
-        <div class="settings-group" style="margin-bottom: 1.5rem;">
-          <label for="theme-select" style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary);">Theme</label>
+      <div class="panel-body" style="padding: 1.5rem; overflow-y: auto;">
+        
+        <!-- Appearance -->
+        <h3 class="section-title" style="border-bottom:none; margin-bottom: 0.5rem; font-size: 1.1rem;">Appearance</h3>
+        <div class="settings-group" style="margin-bottom: 2rem; padding: 1rem; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <label for="theme-select" style="display: block; margin-bottom: 0.5rem; color: var(--text-primary);">Theme</label>
           <select id="theme-select" class="date-picker" style="width: 100%;">
             <option value="cosmic-dark">Cosmic Dark</option>
             <option value="high-contrast">High Contrast</option>
           </select>
         </div>
-        <div class="settings-group">
-          <label style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); cursor: pointer;">
+
+        <!-- Discovery -->
+        <h3 class="section-title" style="border-bottom:none; margin-bottom: 0.5rem; font-size: 1.1rem;">Discovery</h3>
+        <div class="settings-group" style="margin-bottom: 2rem; padding: 1rem; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <label for="default-view-select" style="display: block; margin-bottom: 0.5rem; color: var(--text-primary);">Default Startup View</label>
+          <select id="default-view-select" class="date-picker" style="width: 100%; margin-bottom: 1rem;">
+            <option value="dashboard">Dashboard</option>
+            <option value="explorer">Explorer</option>
+            <option value="apod">Today's APOD</option>
+          </select>
+        </div>
+
+        <!-- Offline & Storage -->
+        <h3 class="section-title" style="border-bottom:none; margin-bottom: 0.5rem; font-size: 1.1rem;">Offline & Storage</h3>
+        <div class="settings-group" style="margin-bottom: 2rem; padding: 1rem; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+            Images and API data are cached automatically for offline viewing.
+          </p>
+          <button class="btn btn-secondary" id="btn-clear-cache">Clear Offline Cache</button>
+        </div>
+
+        <!-- NASA API -->
+        <h3 class="section-title" style="border-bottom:none; margin-bottom: 0.5rem; font-size: 1.1rem;">NASA API Key</h3>
+        <div class="settings-group" style="margin-bottom: 2rem; padding: 1rem; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+            Using your own <a href="https://api.nasa.gov/" target="_blank" style="color: var(--accent); text-decoration: underline;">NASA API key</a> gives you your own request quota (1,000 requests/hour).
+          </p>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem; font-style: italic;">
+            Your key is stored locally in this browser and is never sent to Cosmic APOD's servers. As a frontend app, your key is sent directly to NASA.
+          </p>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+            <input type="text" id="nasa-api-key" class="date-picker" placeholder="Paste your API key here..." style="flex: 1; min-width: 200px;" />
+          </div>
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <button class="btn btn-primary" id="btn-save-key">Save Key</button>
+            <button class="btn btn-secondary" id="btn-remove-key">Remove Key</button>
+          </div>
+        </div>
+
+        <!-- Your Data -->
+        <h3 class="section-title" style="border-bottom:none; margin-bottom: 0.5rem; font-size: 1.1rem;">Your Data</h3>
+        <div class="settings-group" style="margin-bottom: 2rem; padding: 1rem; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 0.5rem;">
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+            Manage your favorites, history, and collections.
+          </p>
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <button class="btn btn-secondary" id="btn-export-data">Export Data (JSON)</button>
+            <button class="btn btn-secondary" id="btn-import-data">Import Data</button>
+          </div>
+          <button class="btn btn-secondary" id="btn-clear-userdata" style="margin-top: 0.5rem; color: var(--danger); border-color: var(--danger);">Clear All Personal Data</button>
+        </div>
+        
+        <!-- Accessibility -->
+        <h3 class="section-title" style="border-bottom:none; margin-bottom: 0.5rem; font-size: 1.1rem;">Accessibility</h3>
+        <div class="settings-group" style="margin-bottom: 2rem; padding: 1rem; background: var(--bg-surface); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+          <label style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary); cursor: pointer;">
             <input type="checkbox" id="reduced-motion-toggle" />
-            Disable Animations (Reduced Motion)
+            Disable UI Animations (Reduced Motion)
           </label>
           <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Respects system preference by default.</p>
         </div>
+
       </div>
     </div>
   </div>
@@ -271,11 +344,28 @@
 
   <!-- ===================== FOOTER ===================== -->
   <footer class="site-footer" role="contentinfo">
-    <p>Data powered by <a href="https://api.nasa.gov" target="_blank" rel="noopener noreferrer">NASA Open APIs</a></p>
-    <p class="footer-tagline">✨ The universe, one day at a time.</p>
+    <div class="footer-content">
+      <p><strong>Cosmic APOD V3</strong> — <a href="https://api.nasa.gov" target="_blank" rel="noopener noreferrer">Data by NASA Open APIs</a></p>
+      <p class="footer-tagline">✨ The universe, one day at a time. Designed with curiosity.</p>
+      <div class="footer-links">
+        <a href="https://github.com/gauravkhatriweb/cosmic-apod" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://stardance.hackclub.com/missions/nasa-page" target="_blank" rel="noopener noreferrer">Hack Club Stardance</a>
+      </div>
+    </div>
   </footer>
 
   <!-- App entry point -->
   <script type="module" src="/src/main.js"></script>
+  
+  <!-- Register Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch((err) => {
+          console.warn('Service Worker registration failed:', err);
+        });
+      });
+    }
+  </script>
 </body>
 </html>

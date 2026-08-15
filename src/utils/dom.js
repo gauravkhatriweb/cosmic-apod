@@ -40,17 +40,31 @@ export function escapeHtml(str) {
 }
 
 /**
- * Show a brief toast notification.
+ * Show a brief toast notification with auto-dismiss and manual dismiss.
  */
-export function showToast(message) {
+export function showToast(message, type = 'info', duration = 4000) {
   const container = $('#toast-container');
   if (!container) return;
 
   const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.textContent = message;
+  toast.className = `toast toast-${type}`;
+  toast.setAttribute('role', 'alert');
+  toast.setAttribute('aria-live', 'assertive');
+  
+  toast.innerHTML = `
+    <span class="toast-message">${escapeHtml(message)}</span>
+    <button type="button" class="toast-close" aria-label="Dismiss notification">✕</button>
+  `;
+  
   container.appendChild(toast);
 
-  // Remove after animation completes
-  setTimeout(() => toast.remove(), 3000);
+  let timeoutId;
+  const dismiss = () => {
+    toast.classList.add('toast-exit');
+    toast.addEventListener('animationend', () => toast.remove());
+    clearTimeout(timeoutId);
+  };
+  
+  toast.querySelector('.toast-close').addEventListener('click', dismiss);
+  timeoutId = setTimeout(dismiss, duration);
 }
