@@ -13,7 +13,8 @@ const STORAGE_KEY = 'cosmic_apod_favorites';
  * Read the full favorites list.
  */
 export function getFavorites() {
-  return storageGet(STORAGE_KEY, []);
+  const data = storageGet(STORAGE_KEY, []);
+  return Array.isArray(data) ? data : [];
 }
 
 /**

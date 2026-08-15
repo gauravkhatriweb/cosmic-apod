@@ -1,0 +1,45 @@
+/* ================================================================
+   THEMES
+   ================================================================ */
+
+/* Default: Cosmic Dark */
+:root {
+  /* These are the defaults from style.css, overridden below if a theme applies */
+}
+
+/* Theme: High Contrast */
+:root[data-theme="high-contrast"] {
+  --bg-deep:       #000000;
+  --bg-primary:    #000000;
+  --bg-surface:    #111111;
+  --bg-card:       #111111;
+  --bg-glass:      #111111;
+  --bg-hover:      #333333;
+
+  --text-primary:  #ffffff;
+  --text-secondary:#dddddd;
+  --text-muted:    #bbbbbb;
+
+  --accent:        #ffcc00;
+  --accent-hover:  #ffea00;
+  --accent-dim:    rgba(255, 204, 0, 0.2);
+  --accent-glow:   rgba(255, 204, 0, 0.4);
+
+  --danger:        #ff0000;
+  --success:       #00ff00;
+  --warning:       #ffff00;
+
+  --border-color:  #ffffff;
+  --border-glow:   #ffffff;
+
+  --shadow-sm:  none;
+  --shadow-md:  none;
+  --shadow-lg:  none;
+  --shadow-glow:none;
+}
+
+/* Reduced Motion Override */
+:root[data-reduced-motion="true"] * {
+  transition: none !important;
+  animation: none !important;
+}

@@ -7,7 +7,7 @@
 import { $, show, hide, escapeHtml } from '../utils/dom.js';
 import { formatDate } from '../utils/dates.js';
 import { getFavorites, removeFavorite } from './favorites.js';
-import { getHistory } from './history.js';
+import { getHistory, clearHistory } from './history.js';
 
 let previousFocus = null;
 let onItemClick = null;
@@ -73,6 +73,18 @@ function renderPanelItems(body, mode) {
   }
 
   body.innerHTML = '';
+  
+  if (mode === 'history' && items.length > 0) {
+    const clearBtnHtml = `
+      <div style="text-align: right; margin-bottom: 1rem;">
+        <button type="button" class="btn btn-secondary" id="btn-clear-history" style="font-size: 0.8rem; padding: 0.3rem 0.6rem;">Clear History</button>
+      </div>
+    `;
+    body.innerHTML = clearBtnHtml;
+    
+    // We must bind this after setting innerHTML, so we'll do it later or inline.
+    // Better to bind later. We'll set a timeout or bind at the end of renderPanelItems.
+  }
 
   for (const item of items) {
     const el = document.createElement('div');
@@ -132,6 +144,16 @@ function renderPanelItems(body, mode) {
 
     body.appendChild(el);
   }
+  
+  if (mode === 'history') {
+    const clearBtn = body.querySelector('#btn-clear-history');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        clearHistory();
+        renderPanelItems(body, mode);
+      });
+    }
+  }
 }
 
 /**
@@ -149,6 +171,24 @@ export function initPanel() {
     if (e.key === 'Escape') {
       e.preventDefault();
       closePanel();
+    }
+    if (e.key === 'Tab') {
+      // Very basic focus trap for panel
+      const focusableElements = panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      const first = focusableElements[0];
+      const last = focusableElements[focusableElements.length - 1];
+      
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          last?.focus();
+          e.preventDefault();
+        }
+      } else {
+        if (document.activeElement === last) {
+          first?.focus();
+          e.preventDefault();
+        }
+      }
     }
   });
 }

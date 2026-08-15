@@ -56,3 +56,20 @@ export function getDateFromUrl() {
   const params = new URLSearchParams(window.location.search);
   return params.get('date') || null;
 }
+
+/**
+ * Update the URL query string with the current date without reloading.
+ */
+export function setUrlDate(dateOrView) {
+  const url = new URL(window.location);
+  url.searchParams.set('date', dateOrView);
+  
+  const view = (dateOrView === 'dashboard' || dateOrView === 'explorer') ? dateOrView : 'apod';
+  
+  // Use replaceState initially if no query param exists to avoid empty history
+  if (!window.history.state) {
+    window.history.replaceState({ view, date: view === 'apod' ? dateOrView : null }, '', url);
+  } else {
+    window.history.pushState({ view, date: view === 'apod' ? dateOrView : null }, '', url);
+  }
+}

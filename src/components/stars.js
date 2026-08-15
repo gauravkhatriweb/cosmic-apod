@@ -6,6 +6,8 @@
  * Respects prefers-reduced-motion.
  */
 
+import { getSettings } from './settings.js';
+
 export function initStars() {
   const canvas = document.getElementById('star-canvas');
   if (!canvas) return;
@@ -15,9 +17,13 @@ export function initStars() {
   let animationId;
   let width, height;
 
-  // Detect reduced motion
-  const prefersReducedMotion =
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const { reducedMotion } = getSettings();
+
+  // Completely disable starfield if reduced motion is preferred
+  if (reducedMotion) {
+    canvas.style.display = 'none';
+    return;
+  }
 
   function resize() {
     width  = canvas.width  = window.innerWidth;
@@ -57,19 +63,12 @@ export function initStars() {
     animationId = requestAnimationFrame(draw);
   }
 
-  // If reduced motion, draw once and stop
-  if (prefersReducedMotion) {
-    resize();
-    draw(0);
-    cancelAnimationFrame(animationId);
-  } else {
-    resize();
-    draw(0);
-  }
+  resize();
+  draw(0);
 
   window.addEventListener('resize', () => {
     cancelAnimationFrame(animationId);
     resize();
-    if (!prefersReducedMotion) draw(performance.now());
+    draw(performance.now());
   });
 }

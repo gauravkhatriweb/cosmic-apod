@@ -13,6 +13,10 @@
   <meta property="og:title" content="Cosmic APOD" />
   <meta property="og:description" content="Explore NASA's Astronomy Picture of the Day — beautifully presented." />
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://cosmic-apod.vercel.app/" />
+  <meta property="og:image" content="https://cosmic-apod.vercel.app/favicon.svg" />
+  
+  <link rel="canonical" href="https://cosmic-apod.vercel.app/" />
 
   <!-- Favicon -->
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -23,6 +27,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <!-- Styles -->
+  <link rel="stylesheet" href="/src/styles/theme.css" />
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
@@ -38,6 +43,14 @@
       </a>
 
       <nav class="header-nav" aria-label="Primary">
+        <button type="button" class="nav-btn" id="btn-nav-dashboard" aria-label="Go to Dashboard">
+          <span class="nav-icon" aria-hidden="true">⊞</span>
+          <span>Dashboard</span>
+        </button>
+        <button type="button" class="nav-btn" id="btn-nav-explorer" aria-label="Explore the archive">
+          <span class="nav-icon" aria-hidden="true">🔭</span>
+          <span>Explorer</span>
+        </button>
         <button type="button" class="nav-btn" id="btn-today" aria-label="Go to today's picture">
           <span class="nav-icon" aria-hidden="true">☀</span>
           <span>Today</span>
@@ -54,6 +67,10 @@
           <span class="nav-icon" aria-hidden="true">⏱</span>
           <span>History</span>
         </button>
+        <button type="button" class="nav-btn" id="btn-settings" aria-label="Open settings">
+          <span class="nav-icon" aria-hidden="true">⚙️</span>
+          <span>Settings</span>
+        </button>
       </nav>
 
       <!-- Mobile menu toggle -->
@@ -65,10 +82,13 @@
 
     <!-- Mobile dropdown menu -->
     <div class="mobile-menu" id="mobile-menu" hidden>
+      <button type="button" class="mobile-nav-btn" data-action="dashboard">⊞ Dashboard</button>
+      <button type="button" class="mobile-nav-btn" data-action="explorer">🔭 Explorer</button>
       <button type="button" class="mobile-nav-btn" data-action="today">☀ Today</button>
       <button type="button" class="mobile-nav-btn" data-action="random">🎲 Random</button>
       <button type="button" class="mobile-nav-btn" data-action="favorites">★ Favorites</button>
       <button type="button" class="mobile-nav-btn" data-action="history">⏱ History</button>
+      <button type="button" class="mobile-nav-btn" data-action="settings">⚙️ Settings</button>
     </div>
   </header>
 
@@ -77,13 +97,25 @@
 
   <!-- ===================== MAIN ===================== -->
   <main id="main-content">
+  
+    <!-- ===================== VIEW: DASHBOARD ===================== -->
+    <section id="view-dashboard" hidden aria-label="Dashboard View">
+      <!-- Populated by JS -->
+    </section>
 
-    <!-- Date Navigation Bar -->
+    <!-- ===================== VIEW: EXPLORER ===================== -->
+    <section id="view-explorer" hidden aria-label="Explorer View">
+      <!-- Populated by JS -->
+    </section>
+
+    <!-- ===================== VIEW: SINGLE APOD ===================== -->
+    <section id="view-apod" aria-label="Single APOD View">
     <section class="date-bar" aria-label="Date navigation">
       <button type="button" class="date-nav-btn" id="btn-prev" aria-label="Previous day">
         ‹
       </button>
       <div class="date-picker-wrap">
+        <label for="date-picker" class="sr-only">Select a date</label>
         <input type="date" id="date-picker" class="date-picker"
           aria-label="Select a date" />
       </div>
@@ -135,9 +167,21 @@
         <h1 class="hero-title" id="apod-title"></h1>
 
         <p class="hero-explanation" id="apod-explanation"></p>
-        <button type="button" class="read-more-btn" id="btn-read-more" hidden>
-          Read more
+        
+        <!-- Education Mode Toggle -->
+        <button type="button" class="btn btn-secondary education-toggle-btn" id="btn-education-toggle" aria-expanded="false" aria-controls="education-panel">
+          <span class="nav-icon" aria-hidden="true">🎓</span> Learn More
         </button>
+
+        <!-- Education Panel -->
+        <div id="education-panel" class="education-panel" hidden>
+          <h4>Cosmic Insight</h4>
+          <ul class="education-meta-list">
+            <li><strong>Date:</strong> <span id="edu-date"></span></li>
+            <li><strong>Media:</strong> <span id="edu-media"></span></li>
+            <li><strong>Source:</strong> NASA Astronomy Picture of the Day</li>
+          </ul>
+        </div>
 
         <footer class="hero-footer">
           <p class="hero-copyright" id="apod-copyright"></p>
@@ -168,6 +212,7 @@
         </footer>
       </div>
     </article>
+    </section>
   </main>
 
   <!-- ===================== SIDE PANEL (Favorites / History) ===================== -->
@@ -183,6 +228,33 @@
       </div>
     </div>
   </aside>
+
+  <!-- ===================== SETTINGS MODAL ===================== -->
+  <div class="lightbox" id="settings-modal" hidden role="dialog" aria-modal="true" aria-label="Settings">
+    <div class="lightbox-backdrop" id="settings-backdrop"></div>
+    <div class="panel-content settings-content" style="max-width: 400px; margin: 10vh auto; position: relative; z-index: 200;">
+      <div class="panel-header">
+        <h2 class="panel-title">Settings</h2>
+        <button type="button" class="panel-close" id="settings-close" aria-label="Close settings">✕</button>
+      </div>
+      <div class="panel-body">
+        <div class="settings-group" style="margin-bottom: 1.5rem;">
+          <label for="theme-select" style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary);">Theme</label>
+          <select id="theme-select" class="date-picker" style="width: 100%;">
+            <option value="cosmic-dark">Cosmic Dark</option>
+            <option value="high-contrast">High Contrast</option>
+          </select>
+        </div>
+        <div class="settings-group">
+          <label style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); cursor: pointer;">
+            <input type="checkbox" id="reduced-motion-toggle" />
+            Disable Animations (Reduced Motion)
+          </label>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Respects system preference by default.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ===================== LIGHTBOX ===================== -->
   <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Fullscreen image view">

@@ -1,134 +1,190 @@
 <div align="center">
 
 # ✦ Cosmic APOD
-**The universe, one day at a time.**
 
-A beautifully crafted NASA Astronomy Picture of the Day explorer offering an immersive, space-themed way to discover our cosmos. Built for speed, discovery, and accessibility.
+### The universe, one day at a time.
+
+A modern NASA Astronomy Picture of the Day explorer built for discovery, learning, and exploration.
+
+[Live Demo](https://cosmic-apod.vercel.app) • [GitHub](https://github.com/gauravkhatriweb/cosmic-apod) • [NASA APOD API](https://api.nasa.gov/)
 
 [![Vite](https://img.shields.io/badge/Vite-6.3-646CFF?logo=vite&logoColor=white)](#)
 [![Vanilla JS](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black)](#)
 [![NASA API](https://img.shields.io/badge/NASA-APOD_API-0B3D91?logo=nasa&logoColor=white)](#)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](#)
-
-[Live Demo](https://cosmic-apod.vercel.app) • [Hack Club Stardance](https://stardance.hackclub.com/missions/nasa-page)
+[![Version](https://img.shields.io/badge/Version-V2-blue)](#)
+[![Status](https://img.shields.io/badge/Status-Active_Development-success)](#)
 
 </div>
 
 ---
 
-## 🔭 About The Project
+Cosmic APOD is a modern, immersive web application that brings NASA's Astronomy Picture of the Day archive to life for space enthusiasts and educators through a seamless, highly polished discovery experience.
 
-Cosmic APOD is an independent, evolving prototype designed to bring NASA's Astronomy Picture of the Day (APOD) archive to life. While the NASA API provides incredible data, standard data views often lack the awe-inspiring atmosphere the subject matter deserves.
+---
 
-This application provides a **highly polished, observatory-like dashboard** complete with deep-space color palettes, an animated starfield canvas, glass-morphism UI elements, and a focus on both imagery and education. 
+## ✨ What's New in V2
 
-It was initially built as part of the [Hack Club Stardance: Give Your Website a Pulse](https://stardance.hackclub.com/missions/nasa-page) mission. Rather than just fulfilling the tutorial requirements, this project goes further by introducing state management, persistent local storage, interactive UI panels, and modern CSS architectural patterns.
+V2 completely transforms the prototype into a production-ready Single Page Application (SPA).
 
-*Note: This is an active prototype (V1). Check the [Roadmap](#-roadmap) to see what's planned for V2.*
+### 🔭 Discovery
+- **Dashboard:** A daily portal featuring Today's APOD, "On This Day" (last year), and recent discoveries.
+- **Explorer:** A dedicated archive view to shuffle randomly or browse the last 20 days.
+- **Education Mode:** Expandable panels offering contextual cosmic insights.
+
+### ❤️ Personalization
+- **Favorites & History:** Slide-out panels to manage saved and recently viewed APODs.
+- **Themes:** Support for Cosmic Dark and High Contrast modes.
+
+### 🎨 Experience
+- **SPA Architecture:** Seamless transitions between views without full page reloads.
+- **Immersive Media:** Fullscreen lightbox for high-resolution images and integrated support for YouTube/Vimeo video APODs.
+- **Reduced Motion:** Automatic disabling of canvas starfields and CSS transitions for users preferring reduced motion.
+
+### ⚡ Engineering
+- **Resilience:** Intelligent request caching and `AbortController` cancellation to handle rapid user navigation.
+- **Error Recovery:** Graceful fallback UI for network failures.
+- **Hardened Persistence:** Safe `localStorage` wrappers to prevent crashes from quota limits or corrupted data.
 
 ---
 
 ## ✨ Features
 
-### Currently Implemented (V1)
-- **Daily APOD:** View today's Astronomy Picture of the Day with full metadata.
-- **Date Navigation:** Jump to any specific day in the APOD archive (from June 16, 1995, to today).
-- **Random Discovery:** A single click retrieves a random day in astronomy history.
-- **Favorites:** Heart and save APODs. Persisted locally via `localStorage`.
-- **History Tracking:** Automatically maintains a list of your recently viewed APODs.
-- **Immersive Media:** Fullscreen lightbox for high-resolution images, plus seamless support for YouTube/Vimeo video APODs.
-- **Sharing Capabilities:** Utilizes the Web Share API on supported devices, gracefully falling back to clipboard copying.
-- **Atmospheric UI:** Features a dynamic, canvas-based animated starfield and refined CSS glass-morphism.
+### 🌌 Explore
+Navigate between the curated **Dashboard** and the sprawling **Explorer** grid to discover random APODs from the past three decades.
 
-### Coming Next (V2)
-- **Search & Filter:** Browse the APOD archive by keyword or category.
-- **Personalization Preferences:** Dedicated settings for themes and reduced-motion preferences.
-- **Improved Caching:** Service worker and persistent request deduplication to save NASA API bandwidth.
-- **Accessibility Upgrades:** Comprehensive screen-reader testing and high-contrast modes.
+### 📅 Archive
+Use the built-in date picker or keyboard-navigable arrows to seamlessly jump to any specific day in the NASA archive since June 1995.
 
----
+### ❤️ Favorites
+Save breathtaking cosmic imagery to your personal Favorites panel. Data is safely serialized and synced to your browser's local storage.
 
-## 🛠 Tech Stack
+### 🕘 History
+Never lose track of a discovery. The History panel automatically logs recently viewed APODs for quick retrieval.
 
-| Technology | Purpose |
-|------------|---------|
-| **Vite** | Lightning-fast development server and optimized production build |
-| **Vanilla JavaScript** | Core application logic, API communication, and state management |
-| **CSS** | Custom responsive UI, animations, CSS variables, and glass-morphism |
-| **NASA APOD API** | The source of truth for daily astronomy data |
-| **GitHub Actions** | Automated CI/CD pipeline for deploying the application |
+### 🖼 Media
+Enjoy uninterrupted viewing with a fullscreen lightbox for high-definition photography and native iframe embedding for video APODs.
+
+### 📤 Sharing
+Generate and copy deep links directly to a specific APOD date using the integrated Share action.
+
+### 🎨 Personalization
+Switch seamlessly between the default Cosmic Dark atmosphere or a High Contrast mode tailored for readability.
+
+### ♿ Accessibility
+Fully navigable via keyboard, trapped focus inside modals, screen-reader-friendly labels, visible focus rings, and strict adherence to OS-level motion preferences.
+
+### ⚡ Performance
+Skeleton loaders prevent layout shifts, while aggressive API caching and request cancellation keep the application lightning fast.
 
 ---
 
 ## ⚙️ How It Works
 
-Cosmic APOD follows a clean, vanilla JavaScript architectural pattern:
+```mermaid
+flowchart TD
+    User([User Interaction]) --> View[UI / View Renderer]
+    View --> Store[State Manager]
+    Store --> API[NASA API Client]
+    API --> Validate[Response Validation]
+    Validate -. Cache & Return .-> Store
+    Store --> View
+    Store -. Sync .-> Storage[(LocalStorage)]
+```
 
-**User Interaction ↓ App State Manager ↓ NASA API Client ↓ Response Validation ↓ DOM Update**
-
-1. The user requests a date (or clicks "Random").
-2. The UI enters a skeleton/loading state to prevent layout shift.
-3. The `nasa.js` module fetches data from the APOD endpoint.
-4. Validation checks if the media is an image or video, handling HD sources.
-5. `dom.js` orchestrates rendering the response, updating metadata, and injecting the canvas background.
-6. User interactions (Favorites/History) are serialized and synced to `localStorage`.
+Cosmic APOD uses a clean, Vanilla JavaScript Single Page Application (SPA) architecture. User interactions dispatch updates to a centralized `store.js`. The store triggers the `nasa.js` API client, which handles rate limiting, caching, and race-condition prevention via `AbortController`. Once validated, the state changes trigger the UI to render the new data dynamically without page reloads, while persisting favorites, history, and settings to `localStorage`.
 
 ---
 
-## 🔌 API Documentation
+## 🛠 Tech Stack
 
-This project integrates with the **[NASA Astronomy Picture of the Day (APOD) API](https://api.nasa.gov/)**.
+| Technology | Role |
+|---|---|
+| **Vite** | Development server and production build |
+| **Vanilla JavaScript** | Application logic, routing, and state management |
+| **CSS** | Custom responsive UI, design system, and glassmorphism |
+| **NASA APOD API** | The source of truth for daily astronomy data |
+| **LocalStorage** | Client-side persistence for preferences and favorites |
+| **GitHub Actions** | Automated CI/CD pipeline |
+
+---
+
+## 📁 Project Structure
+
+```text
+cosmic-apod/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml          # GitHub Actions deployment
+├── public/
+│   └── favicon.svg             # Application favicon
+├── screenshots/                  
+│   └── v1/                     # Deprecated V1 screenshots
+├── src/
+│   ├── api/                    # API client and caching
+│   ├── components/             # Reusable UI components and modals
+│   ├── state/                  # Centralized application store
+│   ├── styles/                 # Theme variables
+│   ├── utils/                  # Date, DOM, and storage helpers
+│   ├── views/                  # Dashboard and Explorer logic
+│   ├── main.js                 # Application entry and router
+│   └── style.css               # Global stylesheets
+├── .env.example
+├── .gitignore
+├── index.html
+├── package.json
+├── vite.config.js
+└── README.md
+```
+
+---
+
+## 🔌 NASA APOD API
+
+This project retrieves its data directly from the [NASA Astronomy Picture of the Day API](https://api.nasa.gov/).
 
 - **Endpoint:** `https://api.nasa.gov/planetary/apod`
-- **Authentication:** Requires a valid `api_key` passed as a query parameter.
-- **Data Retrieved:** Date, title, explanation, media type (image/video), standard URL, and HD URL.
+- **Data Retrieved:** APOD title, date, explanation, media type, standard URL, and HD URL.
+- **Rate Limits:** `DEMO_KEY` allows 30 requests/hour per IP. A personal API key allows 1,000 requests/hour.
 
-### Security Note on `VITE_NASA_API_KEY`
-The application relies on a `.env` file for the API key during development. Because Vite is building a purely client-side application, any variable prefixed with `VITE_` is exposed to the browser. 
-> ⚠️ **This is perfectly acceptable for the free, rate-limited public NASA API.** However, this pattern should **never** be used for sensitive credentials (e.g., AWS keys, database passwords, or payment tokens).
+> ⚠️ **Security Note:** Vite bundles variables prefixed with `VITE_` into the client-side code. This means your NASA API key will be visible in the browser network tab. This is perfectly acceptable for the free, public NASA API, but you should never use this pattern for sensitive credentials like database passwords or paid service tokens.
 
 ---
 
-## 🚀 Setup Guide
+## 🚀 Local Development
 
 ### Requirements
 - Node.js (v18 or higher)
 - Git
 - A [free NASA API key](https://api.nasa.gov/) (You can use `DEMO_KEY` temporarily, but rate limits apply).
 
-### 1. Installation
+### Installation
 
 ```bash
-# Clone the repository
 git clone https://github.com/gauravkhatriweb/cosmic-apod.git
-
-# Navigate to the project directory
 cd cosmic-apod
-
-# Install dependencies
 npm install
 ```
 
-### 2. Environment Configuration
+### Environment Setup
 
+Copy the example environment file:
 ```bash
-# Copy the example environment file
 cp .env.example .env
 ```
+
 Open `.env` and insert your NASA API key:
 ```env
 VITE_NASA_API_KEY=your_api_key_here
 ```
-*(Note: `.env` is included in `.gitignore` and must not be committed to the repository.)*
+*(Note: `.env` is ignored by Git and will not be committed.)*
 
-### 3. Development Server
+### Development
 
 ```bash
 npm run dev
 ```
-Open `http://localhost:5173` to view the application in your browser.
 
-### 4. Production Build & Preview
+### Production Build
 
 ```bash
 npm run build
@@ -139,81 +195,107 @@ npm run preview
 
 ## 🌐 Deployment
 
-This project is configured for continuous deployment to **GitHub Pages** via GitHub Actions.
+The project is configured to deploy automatically via GitHub Actions (`.github/workflows/deploy.yml`) to GitHub Pages. It can also be seamlessly deployed to Vercel.
 
-1. **GitHub Secrets:** Add your NASA API key as a repository secret named `VITE_NASA_API_KEY`.
-2. **GitHub Pages Configuration:** In repository settings, set the source to "GitHub Actions".
-3. **Trigger:** The workflow (`.github/workflows/deploy.yml`) will automatically build the Vite project and deploy the `dist` directory upon pushing to the `main` branch.
-
-*(You can also preview the live deployment on Vercel: [Live Demo](https://cosmic-apod.vercel.app))*
-
----
-
-## 📁 Project Structure
-
-```text
-.
-├── .github/
-│   └── workflows/
-│       └── deploy.yml          # GitHub Actions deployment workflow
-├── public/
-│   └── favicon.svg             # Application favicon
-├── src/
-│   ├── api/
-│   │   └── nasa.js             # API interaction logic
-│   ├── components/
-│   │   ├── favorites.js        # Favorites state management
-│   │   ├── history.js          # History tracking logic
-│   │   ├── lightbox.js         # Fullscreen media viewer
-│   │   ├── panel.js            # Sidebar UI interactions
-│   │   ├── share.js            # Sharing API integration
-│   │   └── stars.js            # Canvas rendering
-│   ├── utils/
-│   │   ├── dates.js            # Date calculation utilities
-│   │   ├── dom.js              # DOM manipulation and sanitization
-│   │   └── storage.js          # LocalStorage wrapper
-│   ├── main.js                 # Primary application entry point
-│   └── style.css               # Global CSS and component styling
-├── screenshots/                # Application preview images
-├── .env.example                # Example environment file
-├── .gitignore                  # Git ignored files configuration
-├── index.html                  # Main HTML template
-├── package.json                # Project metadata and scripts
-├── vite.config.js              # Vite configuration
-└── README.md                   # Project documentation
-```
+To deploy your own instance:
+1. Ensure your hosting platform supports Node.js/Vite builds.
+2. Set the Build Command to `npm run build`.
+3. Set the Output Directory to `dist`.
+4. Add your `VITE_NASA_API_KEY` as an environment variable in your deployment platform's dashboard or GitHub Secrets.
 
 ---
 
-## 🧠 Development Philosophy
+## ♿ Accessibility
 
-- **Start Simple:** Build a reliable core experience before introducing complexity.
-- **Vanilla First:** Understand browser APIs and the DOM deeply before reaching for large UI frameworks.
-- **Visual Polish Matters:** A beautiful interface encourages discovery. The data is incredible; the presentation should match.
-- **Iterative Growth:** V1 proves the concept. V2 refines and expands it.
+Cosmic APOD treats accessibility as a first-class citizen:
+- **Keyboard Navigation:** All grid cards, buttons, and panels are fully navigable via `Tab`, `Enter`, and `Space`.
+- **Focus Trapping:** Opening the Lightbox, Settings, or Side Panels traps keyboard focus so screen-reader users don't accidentally navigate the hidden background.
+- **Semantic HTML:** Strict usage of `<main>`, `<article>`, `<aside>`, `<time>`, and `<header>` roles.
+- **Reduced Motion:** Canvas animations and CSS hover transitions are completely disabled if the user's OS requests `prefers-reduced-motion` or via the in-app toggle.
+- **Clear Indicators:** Visible focus rings (`outline: 2px solid`) ensure keyboard users know exactly where they are.
+
+---
+
+## ⚡ Performance
+
+- **Lazy DOM Rendering:** Skeleton loaders are used while fetching to entirely prevent layout shift.
+- **Request Cancellation:** Navigating rapidly through dates uses `AbortController` to cancel in-flight API requests, saving bandwidth and preventing race conditions.
+- **Aggressive Caching:** Once an APOD is fetched, it is stored in a fast in-memory cache to prevent duplicate network calls.
+- **Framework-less:** By avoiding heavy frameworks like React or Vue, the final bundled application payload is exceptionally small and parses instantly.
+
+---
+
+## 🎨 Design Philosophy
+
+> Cosmic APOD treats astronomy as an experience rather than simply an API response. The interface combines deep-space visuals, cinematic media presentation, restrained motion, and clear information hierarchy without allowing decoration to interfere with usability.
+
+---
+
+## 🔄 V1 → V2 Evolution
+
+| Area | V1 (Prototype) | V2 (Production) |
+|---|---|---|
+| **Architecture** | Single static view | Multi-view SPA with virtual routing |
+| **Discovery** | Single date picker | Dedicated Dashboard and Explorer views |
+| **Networking** | Basic fetch | Caching, `AbortController`, graceful fallbacks |
+| **Accessibility** | Basic | Focus trapping, robust keyboard support, reduced motion |
+| **Resilience** | Brittle storage | Hardened local storage fallbacks |
+| **Media** | Standard viewer | Advanced fullscreen Lightbox |
 
 ---
 
 ## 🗺 Roadmap
 
-### V1 — Prototype (Current)
-- [x] Core APOD integration
-- [x] Date traversal & Random generation
-- [x] Local storage for favorites and history
-- [x] Fully responsive atmospheric UI
-- [x] Media lightbox and video support
+### ✅ Completed — V2
+- Single Page Application architecture
+- Dashboard and Explorer views
+- Theming and Settings panel
+- Focus trapping and A11y hardening
+- AbortController and caching
 
-### V2 — The Upgrade (Planned)
-- [ ] **Feature:** "On This Day" astronomy history.
-- [ ] **Feature:** PWA support for offline caching of favorites.
-- [ ] **Feature:** Astronomy education expansion (telescope info, terms).
-- [ ] **Feature:** UI personalization (themes, high-contrast mode).
-- [ ] **Feature:** Skeleton loading and optimized request caching.
+### 🚧 Next — V2.x
+- Machine learning-based image tagging
+- Date range filtering within the Explorer view
+- Shareable Collections
+
+### 🔭 Future — V3
+- Full Offline PWA support with Service Workers
+- WebGL enhanced stargazing background
 
 ---
 
 ## 🤝 Contributing
-Contributions, issues, and feature requests are welcome! Feel free to check the issues page if you want to contribute.
+
+Contributions are welcome!
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Test locally (`npm run dev`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
+
+---
 
 ## 📄 License
-This project is licensed under the MIT License - see the `LICENSE` file for details.
+
+Currently, this repository does not include a LICENSE file. Licensing needs to be added appropriately before formal distribution or contribution guidelines can be legally enforced.
+
+---
+
+## 🙏 Acknowledgements
+
+- **[NASA APOD API](https://api.nasa.gov/)** for providing decades of breathtaking astronomical data.
+- **[Hack Club Stardance](https://stardance.hackclub.com/missions/nasa-page)** for the original mission inspiration.
+
+---
+
+<div align="center">
+
+### ✦ Explore something new every day.
+
+Built with curiosity and the NASA APOD API.
+
+[Live Demo](https://cosmic-apod.vercel.app) · [Repository](https://github.com/gauravkhatriweb/cosmic-apod)
+
+</div>

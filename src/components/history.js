@@ -14,7 +14,8 @@ const MAX_ITEMS   = 30;
  * Read full history list (newest first).
  */
 export function getHistory() {
-  return storageGet(STORAGE_KEY, []);
+  const data = storageGet(STORAGE_KEY, []);
+  return Array.isArray(data) ? data : [];
 }
 
 /**

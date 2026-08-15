@@ -22,11 +22,15 @@
  *   Headers:   X-RateLimit-Limit, X-RateLimit-Remaining
  */
 
+import { getCachedApod, setCachedApod } from './cache.js';
+
 const BASE_URL = 'https://api.nasa.gov/planetary/apod';
 const API_KEY = import.meta.env.VITE_NASA_API_KEY || 'DEMO_KEY';
 
 // NASA APOD archive starts on 1995-06-16
 export const APOD_START_DATE = '1995-06-16';
+
+let currentAbortController = null;
 
 /**
  * Build URL with query parameters.
@@ -46,7 +50,7 @@ function buildUrl(params = {}) {
  * Execute a fetch and handle HTTP / network errors uniformly.
  * Always requests thumbs=true so video APODs include a thumbnail_url.
  */
-async function request(params = {}) {
+async function request(params = {}, signal) {
   // Always request video thumbnails
   params.thumbs = true;
 
@@ -54,8 +58,11 @@ async function request(params = {}) {
   let res;
 
   try {
-    res = await fetch(url);
-  } catch {
+    res = await fetch(url, { signal });
+  } catch (e) {
+    if (e.name === 'AbortError') {
+      throw e; // Let aborts bubble up silently
+    }
     throw new Error('Network error — please check your internet connection.');
   }
 
@@ -70,20 +77,24 @@ async function request(params = {}) {
     }
     if (res.status === 403) throw new Error('Invalid or missing NASA API key.');
     if (res.status >= 500) throw new Error('NASA servers are temporarily unavailable. Please try again later.');
-    // Attempt to extract the API error message
+    
+    // Attempt to extract the API error message, but sanitize it
     try {
       const body = await res.json();
-      throw new Error(body?.msg || body?.error?.message || `API error (${res.status})`);
+      const msg = body?.msg || body?.error?.message;
+      if (msg && !msg.toLowerCase().includes('syntaxerror')) {
+        throw new Error(msg);
+      }
     } catch (e) {
-      if (e.message) throw e;
-      throw new Error(`Unexpected API error (${res.status})`);
+      // Fallback
     }
+    throw new Error('We could not retrieve the astronomy picture for this date.');
   }
 
   try {
     return await res.json();
   } catch {
-    throw new Error('Failed to parse the API response.');
+    throw new Error('We received an invalid response from NASA. Please try another date.');
   }
 }
 
@@ -110,22 +121,91 @@ export function validateApod(data) {
  * Fetch APOD for a specific date (YYYY-MM-DD) or today if omitted.
  */
 export async function fetchApod(date) {
+  // 1. Check cache first
+  if (date) {
+    const cached = getCachedApod(date);
+    if (cached) return cached;
+  }
+
+  // 2. Cancel previous request if any
+  if (currentAbortController) {
+    currentAbortController.abort();
+  }
+  currentAbortController = new AbortController();
+
   const params = {};
   if (date) params.date = date;
-  const raw = await request(params);
-  const apod = validateApod(raw);
-  if (!apod) throw new Error('The API returned an unexpected response format.');
-  return apod;
+
+  try {
+    const raw = await request(params, currentAbortController.signal);
+    const apod = validateApod(raw);
+    if (!apod) throw new Error('The API returned an unexpected response format.');
+    
+    // 3. Update cache
+    if (apod.date) {
+      setCachedApod(apod.date, apod);
+    }
+    
+    return apod;
+  } catch (e) {
+    if (e.name === 'AbortError') throw e; // Handle gracefully in UI
+    throw e;
+  }
 }
 
 /**
  * Fetch a random APOD.
  */
 export async function fetchRandomApod() {
+  // Cannot cache random easily without storing it by the date it returns
+  
+  if (currentAbortController) {
+    currentAbortController.abort();
+  }
+  currentAbortController = new AbortController();
+
   const params = { count: 1 };
-  const raw = await request(params);
-  const list = Array.isArray(raw) ? raw : [raw];
-  const apod = validateApod(list[0]);
-  if (!apod) throw new Error('The API returned an unexpected response format.');
-  return apod;
+  
+  try {
+    const raw = await request(params, currentAbortController.signal);
+    const list = Array.isArray(raw) ? raw : [raw];
+    const apod = validateApod(list[0]);
+    if (!apod) throw new Error('The API returned an unexpected response format.');
+    
+    if (apod.date) {
+      setCachedApod(apod.date, apod);
+    }
+    
+    return apod;
+  } catch (e) {
+    if (e.name === 'AbortError') throw e;
+    throw e;
+  }
+}
+
+/**
+ * Fetch multiple APODs for Explorer or Dashboard grids.
+ * Can take { count: 20 } or { start_date, end_date }
+ */
+export async function fetchMultipleApods(params) {
+  // Use a separate abort controller for bulk requests so they don't cancel
+  // or get cancelled by the main single APOD requests immediately.
+  const bulkAbortController = new AbortController();
+  
+  try {
+    const raw = await request(params, bulkAbortController.signal);
+    const list = Array.isArray(raw) ? raw : [raw];
+    
+    const validApods = list.map(validateApod).filter(Boolean);
+    
+    // Cache them as we get them
+    validApods.forEach(apod => {
+      if (apod.date) setCachedApod(apod.date, apod);
+    });
+    
+    return validApods;
+  } catch (e) {
+    if (e.name === 'AbortError') throw e;
+    throw e;
+  }
 }
