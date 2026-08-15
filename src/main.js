@@ -152,10 +152,12 @@ function renderApod(apod) {
 
   // Show read-more only if the text is long enough to overflow
   if (apod.explanation.length > 400) {
-    show(els.readMore);
-    els.readMore.textContent = 'Read more';
+    if (els.readMore) {
+      show(els.readMore);
+      els.readMore.textContent = 'Read more';
+    }
   } else {
-    hide(els.readMore);
+    if (els.readMore) hide(els.readMore);
     els.explanation.classList.add('expanded');
   }
 
@@ -313,6 +315,17 @@ function bindEvents() {
     } else {
       hide(els.eduPanel);
       els.eduToggleBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  els.readMore?.addEventListener('click', () => {
+    const isExpanded = els.explanation.classList.contains('expanded');
+    if (isExpanded) {
+      els.explanation.classList.remove('expanded');
+      els.readMore.textContent = 'Read more';
+    } else {
+      els.explanation.classList.add('expanded');
+      els.readMore.textContent = 'Show less';
     }
   });
 
