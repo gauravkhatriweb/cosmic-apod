@@ -27,6 +27,7 @@ import { openPanel, initPanel } from './components/panel.js';
 import { shareApod, getDateFromUrl, setUrlDate } from './components/share.js';
 import { deserializeCollectionFromUrl, importCollection } from './components/collections.js';
 import { generateAITags } from './services/tagging/tagger-core.js';
+import { inject } from '@vercel/analytics';
 import {
   getState,
   subscribe,
@@ -35,6 +36,9 @@ import {
   setApodError,
   setView,
 } from './state/store.js';
+
+// Inject Vercel Analytics
+inject();
 
 // ————————————————— DOM References ————————————————— //
 
@@ -446,7 +450,7 @@ function bindEvents() {
     if (!s.currentApod) return;
     
     // Quick prompt for adding to collection
-    import('./components/collections.js').then(({ getCollections, addApodToCollection }) => {
+    import('./components/collections.js').then(({ getCollections, addToCollection }) => {
       const cols = getCollections();
       const colNames = Object.values(cols).map(c => c.name);
       if (colNames.length === 0) {
@@ -458,7 +462,7 @@ function bindEvents() {
       if (targetName && targetName.trim()) {
         const foundId = Object.keys(cols).find(k => cols[k].name.toLowerCase() === targetName.trim().toLowerCase());
         if (foundId) {
-          addApodToCollection(foundId, s.currentApod.date, s.currentApod);
+          addToCollection(foundId, s.currentApod.date);
           showToast(`Added to ${cols[foundId].name}`, 'success');
         } else {
           showToast('Collection not found', 'error');
