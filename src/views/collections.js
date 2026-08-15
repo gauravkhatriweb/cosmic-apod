@@ -89,19 +89,21 @@ async function populateCollectionGrid(id, dateIds) {
   }
 }
 
+let isCollectionsBound = false;
+
 function bindCollectionEvents(container) {
-  const btnCreate = document.getElementById('btn-create-col');
-  if (btnCreate) {
-    btnCreate.addEventListener('click', () => {
+  if (isCollectionsBound) return;
+  
+  container.addEventListener('click', (e) => {
+    // Create Collection
+    if (e.target.closest('#btn-create-col')) {
       const name = prompt('Enter a name for your new collection:');
       if (name && name.trim()) {
         createCollection(name);
         renderCollections();
       }
-    });
-  }
-  
-  container.addEventListener('click', (e) => {
+      return;
+    }
     // Share Collection
     if (e.target.closest('.btn-share-col')) {
       const id = e.target.closest('.btn-share-col').dataset.id;
@@ -152,4 +154,6 @@ function bindCollectionEvents(container) {
       }
     }
   });
+  
+  isCollectionsBound = true;
 }

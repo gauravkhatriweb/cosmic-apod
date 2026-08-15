@@ -51,7 +51,8 @@ const els = {
   explanation:   $('#apod-explanation'),
   readMore:      $('#btn-read-more'),
   copyright:     $('#apod-copyright'),
-  favBtn:        $('#btn-favorite'),
+  favoriteBtn:   $('#btn-favorite'),
+  addColBtn:     $('#btn-add-collection'),
   shareBtn:      $('#btn-share'),
   fullscreenBtn: $('#btn-fullscreen'),
   hdBtn:         $('#btn-hd'),
@@ -232,11 +233,11 @@ subscribe((state) => {
   if (els.nextBtn) els.nextBtn.disabled = isMaxDate(state.currentDate);
 
   // Update Favorite Button Status
-  if (els.favBtn && state.currentApod) {
+  if (els.favoriteBtn && state.currentApod) {
     const fav = isFavorited(state.currentApod.date);
-    els.favBtn.classList.toggle('favorited', fav);
-    els.favBtn.setAttribute('aria-pressed', String(fav));
-    const label = els.favBtn.querySelector('.action-label');
+    els.favoriteBtn.classList.toggle('favorited', fav);
+    els.favoriteBtn.setAttribute('aria-pressed', String(fav));
+    const label = els.favoriteBtn.querySelector('.action-label');
     if (label) label.textContent = fav ? 'Favorited' : 'Favorite';
   }
 
@@ -423,22 +424,50 @@ function bindEvents() {
     }
   });
 
-  els.favBtn?.addEventListener('click', () => {
+  els.favoriteBtn?.addEventListener('click', () => {
     const { currentApod } = getState();
     if (!currentApod) return;
-    const nowFav = toggleFavorite(currentApod);
     
-    // Force a re-render of button via store subscriber by making a harmless state update,
-    // or manually trigger. Easiest is to manually update DOM here since it's localized.
-    els.favBtn.classList.toggle('favorited', nowFav);
-    els.favBtn.setAttribute('aria-pressed', String(nowFav));
-    const label = els.favBtn.querySelector('.action-label');
-    if (label) label.textContent = nowFav ? 'Favorited' : 'Favorite';
-    
-    showToast(nowFav ? 'Added to favorites ★' : 'Removed from favorites');
+    // toggleFavorite takes the apod object
+    import('./components/favorites.js').then(({ toggleFavorite }) => {
+      const nowFav = toggleFavorite(currentApod);
+      
+      els.favoriteBtn.classList.toggle('favorited', nowFav);
+      els.favoriteBtn.setAttribute('aria-pressed', String(nowFav));
+      const label = els.favoriteBtn.querySelector('.action-label');
+      if (label) label.textContent = nowFav ? 'Favorited' : 'Favorite';
+      
+      showToast(nowFav ? 'Added to favorites ★' : 'Removed from favorites');
+    });
   });
 
-  els.shareBtn?.addEventListener('click', () => {
+  els.addColBtn?.addEventListener('click', () => {
+    const s = getState();
+    if (!s.currentApod) return;
+    
+    // Quick prompt for adding to collection
+    import('./components/collections.js').then(({ getCollections, addApodToCollection }) => {
+      const cols = getCollections();
+      const colNames = Object.values(cols).map(c => c.name);
+      if (colNames.length === 0) {
+        showToast('Create a collection first in the Collections tab!', 'info');
+        return;
+      }
+      
+      const targetName = prompt(`Add to which collection?\nAvailable: ${colNames.join(', ')}`);
+      if (targetName && targetName.trim()) {
+        const foundId = Object.keys(cols).find(k => cols[k].name.toLowerCase() === targetName.trim().toLowerCase());
+        if (foundId) {
+          addApodToCollection(foundId, s.currentApod.date, s.currentApod);
+          showToast(`Added to ${cols[foundId].name}`, 'success');
+        } else {
+          showToast('Collection not found', 'error');
+        }
+      }
+    });
+  });
+
+  els.shareBtn?.addEventListener('click', async () => {
     const { currentApod } = getState();
     if (currentApod) shareApod(currentApod);
   });
@@ -446,6 +475,16 @@ function bindEvents() {
   els.fullscreenBtn?.addEventListener('click', () => {
     const { currentApod } = getState();
     if (currentApod) openLightbox(currentApod);
+  });
+
+  els.randomBtn?.addEventListener('click', () => {
+    import('./api/nasa.js').then(({ fetchRandomApod }) => {
+      fetchRandomApod().then(randomApod => {
+        if (randomApod && randomApod.date) {
+          loadApod(randomApod.date);
+        }
+      });
+    });
   });
 
   // Retry
