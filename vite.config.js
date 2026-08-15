@@ -1,9 +1,8 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  // GitHub Pages deploys to /<repo-name>/
-  // Change 'cosmic-apod' if your repository name differs.
-  base: '/cosmic-apod/',
+  // If deploying to Vercel, Netlify, or custom domain, use '/'
+  base: '/',
   build: {
     outDir: 'dist',
     emptyOutDir: true,
