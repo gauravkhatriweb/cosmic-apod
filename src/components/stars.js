@@ -50,7 +50,7 @@ export function initStars() {
     ctx.clearRect(0, 0, width, height);
 
     for (const star of stars) {
-      const twinkle = prefersReducedMotion
+      const twinkle = reducedMotion
         ? star.alpha
         : star.alpha + Math.sin(time * star.speed + star.phase) * 0.25;
 
